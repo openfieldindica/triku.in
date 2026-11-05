@@ -1,0 +1,8 @@
+.deletion-form { max-width: 620px; display: grid; gap: 16px; margin: 32px 0; }
+.deletion-form label { display: block; font-weight: 600; margin-bottom: 8px; }
+.deletion-form input:not([type=checkbox]) { display: block; width: 100%; max-width: 360px; padding: 14px; border: 1px solid #637089; border-radius: 8px; font: inherit; }
+.deletion-form button, .deletion-status button { padding: 14px 20px; border: 0; border-radius: 8px; background: #194dff; color: white; font: inherit; cursor: pointer; margin: 8px 8px 8px 0; }
+button:disabled { opacity: .55; cursor: wait; }
+.deletion-form .danger { background: #b42318; }
+#message { color: #9b2017; }
+[hidden] { display: none !important; }
