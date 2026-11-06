@@ -23,6 +23,11 @@ jobs:
           mapfile -d '' tests < <(git ls-files -z '*.test.js')
           if (( ${#tests[@]} )); then node --test "${tests[@]}"; fi
       - run: python3 scripts/package_site.py
+        env:
+          APP_SITE_ANDROID_SHA256_FINGERPRINTS: ${{ vars.APP_SITE_ANDROID_SHA256_FINGERPRINTS }}
+          APP_SITE_STAGING_ANDROID_SHA256_FINGERPRINTS: ${{ vars.APP_SITE_STAGING_ANDROID_SHA256_FINGERPRINTS }}
+          APP_SITE_APPLE_TEAM_ID: ${{ vars.APP_SITE_APPLE_TEAM_ID }}
+          REQUIRE_APP_LINK_ASSOCIATIONS: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: production-website
