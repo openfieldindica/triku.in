@@ -1,6 +1,8 @@
 # Triku public website
 
-Static public pages for triku.in. GitHub Pages remains the live host until a separately approved DNS cutover. This PR does not change Pages configuration or publish to AWS.
+Static public pages for `https://triku.in`. As of 5 November 2026, Namecheap apex/www DNS points to the AWS CloudFront distribution `E1PVBO8FXCYZZO`, backed by a private, versioned S3 bucket. GitHub Pages remains configured as a temporary rollback path; merging this repository does not publish to AWS.
+
+The current AWS website release is `42043197344-1`, built from `caa51f7` and deployed by [run 42046698604](https://github.com/openfieldindica/triku-production-deploy/actions/runs/42046698604). It includes the account-deletion pages at `/delete-account/` and `/delete-account/staging/`. On 6 November, both paths, the homepage, and `/privacy.html` returned HTTP 200 over HTTPS. A successful page load does not verify the deletion API flow.
 
 ## Release artifact
 
@@ -11,4 +13,4 @@ After review/merge, dispatch **Build website artifact** on main. It validates Ja
 
 The restricted `openfieldindica/triku-production-deploy` repository imports the successful main artifact and its SHA-256 into a reviewed release manifest. Deployment and rollback happen there after separate approval. See its `docs/website-hosting.md`.
 
-The account-deletion page is a separate PR. Build a fresh artifact after that PR merges; this hosting change does not itself ship deletion or change API CORS. Existing Pages branch publishing can still publish merged public page changes until Pages is disabled during cutover; merging this tooling only adds non-product files.
+The account-deletion page merged in website PR #3 and was included in the current AWS release. The reviewed production API task template lists both website hosts in `CORS_ORIGIN`. Verify actual browser preflight, OTP and deletion behavior with a controlled test account before claiming end-to-end deletion works. GitHub Pages branch publishing is still configured; retire it only after the rollback window is closed and the AWS site is accepted.
