@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import zipfile
+from cache_assets import version_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTENSIONS = {'.html', '.css', '.js', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.woff', '.woff2', '.ttf', '.txt'}
@@ -63,21 +64,21 @@ def build(root=ROOT):
     generated = association_files(os.environ)
     if not REQUIRED.issubset(names):
         raise ValueError('Required public pages missing')
+    files = dict(generated)
+    for name in names:
+        path = root / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError('Public files must be regular files')
+        files[name] = path.read_bytes()
+    files = version_assets(files)
     output = root / 'output'; output.mkdir(exist_ok=True)
     with zipfile.ZipFile(output / 'website.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
-        for name in sorted([*names, *generated]):
-            if name in generated:
-                data = generated[name]
-            else:
-                path = root / name
-                if path.is_symlink() or not path.is_file():
-                    raise ValueError('Public files must be regular files')
-                data = path.read_bytes()
+        for name, data in sorted(files.items()):
             info = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(info, data)
-    print(f'Packaged {len(names) + len(generated)} public files in output/website.zip')
+    print(f'Packaged {len(files)} public files in output/website.zip')
 
 
 if __name__ == '__main__':

@@ -19,8 +19,8 @@ jobs:
       - name: Validate website JavaScript and behavior tests
         shell: bash
         run: |
-          while IFS= read -r -d '' file; do node --check "$file"; done < <(git ls-files -z '*.js')
-          mapfile -d '' tests < <(git ls-files -z '*.test.js')
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(git ls-files -z '*.js' '*.mjs')
+          mapfile -d '' tests < <(git ls-files -z '*.test.js' '*.test.mjs')
           if (( ${#tests[@]} )); then node --test "${tests[@]}"; fi
       - run: python3 scripts/package_site.py
         env:

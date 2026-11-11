@@ -1,5 +1,10 @@
 import unittest
-from package_site import public_name, association_files
+import os
+from pathlib import Path
+import tempfile
+from unittest.mock import patch
+import zipfile
+from package_site import public_name, association_files, build, REQUIRED
 
 class PackageTests(unittest.TestCase):
     def test_excludes_private_and_tooling_files(self):
@@ -31,5 +36,27 @@ class PackageTests(unittest.TestCase):
     def test_release_requires_real_production_signing_identity(self):
         with self.assertRaises(ValueError):
             association_files({'REQUIRE_APP_LINK_ASSOCIATIONS': 'true'})
+
+    def test_build_is_reproducible_and_packages_only_tracked_public_dependencies(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in REQUIRED:
+                (root/name).write_text('<link href="styles.css">' if name == 'index.html' else 'public')
+            (root/'styles.css').write_text('body{color:red}')
+            (root/'untracked.js').write_text('private')
+            tracked = '\0'.join([*sorted(REQUIRED), 'styles.css', '.env', 'scripts/build.js']).encode()
+            with patch('package_site.subprocess.check_output', return_value=tracked), patch.dict(os.environ, {}, clear=True):
+                build(root)
+                first = (root/'output/website.zip').read_bytes()
+                build(root)
+            self.assertEqual(first, (root/'output/website.zip').read_bytes())
+            with zipfile.ZipFile(root/'output/website.zip') as archive:
+                names = archive.namelist()
+                self.assertNotIn('untracked.js', names)
+                self.assertNotIn('.env', names)
+                versioned = [name for name in names if name.startswith('releases/assets/')]
+                self.assertEqual(len(versioned), 1)
+                self.assertIn(('/' + versioned[0]).encode(), archive.read('index.html'))
+                self.assertEqual(archive.read(versioned[0]), archive.read('styles.css'))
 
 if __name__ == '__main__': unittest.main()
