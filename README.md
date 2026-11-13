@@ -36,3 +36,11 @@ files in the reserved `releases/` namespace fail the build. Introduce a module
 bundler or extend these checks before adopting those constructs.
 
 The account-deletion page is a separate PR. Build a fresh artifact after that PR merges; this hosting change does not itself ship deletion or change API CORS. Existing Pages branch publishing can still publish merged public page changes until Pages is disabled during cutover; merging this tooling only adds non-product files.
+
+## App legal documents
+
+`terms-of-use.html` contains Terms of Use; `legality.html` contains the separate
+Legality explanation. Both pages cross-link. Existing `/terms-of-use.html#legality`
+links reach a link to the extracted document. This is a presentation-only split;
+legal wording and document dates are preserved. Publish both website pages before
+releasing the mobile Terms & Legality submenu. No publication is implied by this branch.
